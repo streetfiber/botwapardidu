@@ -3,91 +3,80 @@ const f = require("../utils/Formatter");
 const gsheet = require("../service/gsheet");
 
 module.exports = class BotController extends Controller {
-    async handleIncomingMessage(socket, from, text) {
-        // Ganti dengan logika pengolahan pesan Anda
-        if (text === 'menu.booking') {
-            await this.booking(socket, from);
-        } else if (text === 'menu.rincian') {
-            await this.rincian(socket, from);
-        } else {
-            await this.introduction(socket, from);
-        }
-    }
-
-    async introduction(socket, from) {
-        const message = Response.menu.fromArrayOfString(
+    async introduction(request) {
+        return Response.menu.fromArrayOfString(
             [
                 f("menu.booking"),
                 f("menu.rincian"),
                 f("menu.livechat"),
                 f("menu.feedback")
             ],
-            f("intro", [from]), // Menggunakan 'from' untuk menampilkan nama pengguna
+            f("intro", [request.name]),
             f("template.menu")
         );
-        await socket.sendMessage(from, { text: message });
     }
 
-    async booking(socket, from) {
-        // Pastikan nomor WhatsApp tersedia
-        if (!from) {
-            await socket.sendMessage(from, "Silakan masukkan nomor WhatsApp untuk melanjutkan.");
+    async booking(request) {
+        if (!request.number) {
+            await this.reply("Silakan masukkan nomor WhatsApp untuk melanjutkan.");
             return;
         }
-
+    
         // Kirimkan link Google Form
-        await socket.sendMessage(from, f("menubookingtemplate"));
-        await socket.sendMessage(from, f("menubookingtemplate2"));
-
+        await this.reply(f("menubookingtemplate"));
+        await this.reply(f("menubookingtemplate2"));
+        
         // Setelah mengirim template booking, cek status pembayaran dengan GET request
         try {
+            
             const response = await axios.get("https://my-nodejs-project-production.up.railway.app/midtrans-finish", {
                 params: {
-                    order_id: "your_order_id", // Sesuaikan dengan order_id dari form, jika ada
-                    whatsapp: from,
-                    jumlah_orang: "your_jumlah_orang", // Ganti dengan data yang sesuai
-                    tanggal_foto: "your_tanggal_foto", // Ganti dengan data yang sesuai
-                    jam_foto: "your_jam_foto", // Ganti dengan data yang sesuai
-                    harga_total: "your_harga_total", // Ganti dengan data yang sesuai
-                    status_message: 'berhasil',
+                    order_id: request.body.order_id, // Sesuaikan dengan order_id dari form, jika ada
+                    whatsapp : request.body.whatsapp,
+                    jumlah_orang : request.body.jumlah_orang,
+                    tanggal_foto : request.body.tanggal_foto,
+                    jam_foto : request.body.jam_foto,
+                    harga_total : request.body.harga_total,
+                    status_message : 'berhasil',
                 },
             });
 
             const paymentData = response.data;
 
             // Kirimkan detail pembayaran ke client via WhatsApp
-            await socket.sendMessage(from, `Pembayaran untuk Order ID: ${paymentData.order_id} berhasil. Detail pembayaran:\nNama: ${paymentData.name}\nJumlah Orang: ${paymentData.jumlah_orang}\nTanggal Foto: ${paymentData.tanggal_foto}\nJam Foto: ${paymentData.jam_foto}\nTotal: Rp${paymentData.harga_total}\nStatus: ${paymentData.transaction_status}`);
+            await this.reply(`Pembayaran untuk Order ID: ${paymentData.order_id} berhasil. Detail pembayaran:\nNama: ${paymentData.name}\nJumlah Orang: ${paymentData.jumlah_orang}\nTanggal Foto: ${paymentData.tanggal_foto}\nJam Foto: ${paymentData.jam_foto}\nTotal: Rp${paymentData.harga_total}\nStatus: ${paymentData.transaction_status}`);
         } catch (error) {
             console.error("Error mengambil data dari /midtrans-finish:", error);
-            await socket.sendMessage(from, "Terimakasih Telah menggunakan bot kami, see you soon!");
+            await this.reply("Terimakasih Telah menggunakan bot kami, see you soon!");
         }
 
         // Tampilkan menu dasar setelahnya
-        return this.sendBasicMenu(socket, from);
+        return this.sendBasicMenu();
     }
 
-    async rincian(socket, from) {
-        const responseStr = await gsheet.getData(from);
-        await socket.sendMessage(from, f("headercekriwayat"));
+    async rincian(request) {
+        const responseStr = await gsheet.getData(request.number);
+        await this.reply(f("headercekriwayat"));
         
         if (responseStr) {
-            await socket.sendMessage(from, responseStr);
+            await this.reply(responseStr);
         } else {
-            await socket.sendMessage(from, "Tidak ada data riwayat yang ditemukan.");
+            await this.reply("Tidak ada data riwayat yang ditemukan.");
         }
-
-        return this.sendBasicMenu(socket, from);
+        
+        return this.sendBasicMenu();
     }
     
-    async livechat(socket, from) {
-        return socket.sendMessage(from, "Klik tombol ini untuk memulai live chat.");
+    
+    async livechat(request) {
+        return this.reply("Klik tombol ini untuk memulai live chat.");
     }
 
-    async feedback(socket, from) {
-        return socket.sendMessage(from, "Terimakasih telah menggunakan bot pelayanan kami, mohon untuk mengisi survei penilaian.");
+    async feedback(request) {
+        return this.reply("Terimakasih telah menggunakan bot pelayanan kami, mohon untuk mengisi survei penilaian.");
     }
 
-    async sendBasicMenu(socket, from) {
+    async sendBasicMenu(request) {
         return Response.menu.fromArrayOfObject(
             [
                 {
@@ -98,8 +87,14 @@ module.exports = class BotController extends Controller {
             ],
             "",
             f("template.menu")
-        ).then(menu => {
-            return socket.sendMessage(from, { text: menu });
-        });
+        );
+    }
+
+    async paymentFinish(request) {
+        const { name, whatsapp, jumlah_orang, tanggal_foto, jam_foto, harga_total, order_id, transaction_status } = request.body;
+
+        // Proses data pembayaran dan balas ke pengguna
+        await this.reply(`Pembayaran untuk Order ID: ${order_id} berhasil. Detail pembayaran:\nNama: ${name}\nJumlah Orang: ${jumlah_orang}\nTanggal Foto: ${tanggal_foto}\nJam Foto: ${jam_foto}\nTotal: Rp${harga_total}\nStatus: ${transaction_status}`);
+        return this.sendBasicMenu();
     }
 };
