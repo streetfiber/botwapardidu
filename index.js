@@ -37,7 +37,7 @@ const startSock = async () => {
             if (qr) {
                 console.log('Scan QR code yang muncul di terminal...');
                 // Meng-generate QR code untuk ditampilkan di browser
-                const qrCodeDataURL = await QRCode.toDataURL(qr);
+                const qrCodeDataURL = qr;
                 console.log('QR Code data generated:', qrCodeDataURL);
             }
 
