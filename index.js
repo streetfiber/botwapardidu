@@ -9,13 +9,15 @@ const { ALLOWED_NUMBERS } = process.env;
             allowedNumbers: ALLOWED_NUMBERS ? ALLOWED_NUMBERS.split(',') : null,
             browserName: 'Dewakoding App'
         }
+        
         const pepesan = Pepesan.init(router, config);
 
-        // Menambahkan listener untuk event QR Code
-        pepesan.on('qr', (qr) => {
+        // Menggunakan register untuk event QR
+        pepesan.register('qr', (qr) => {
             console.log('QR Code generated:', qr); // Menampilkan QR Code
         });
 
+        // Menangani koneksi
         await pepesan.connect();
         console.log('Connected to WhatsApp.');
     } catch (error) {
