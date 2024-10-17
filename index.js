@@ -10,8 +10,14 @@ const { ALLOWED_NUMBERS } = process.env;
             browserName: 'Dewakoding App'
         }
         const pepesan = Pepesan.init(router, config);
+
+        // Menambahkan listener untuk event QR Code
+        pepesan.on('qr', (qr) => {
+            console.log('QR Code generated:', qr); // Menampilkan QR Code
+        });
+
         await pepesan.connect();
-        console.log('Connected to WhatsApp, QR Code generated:', pepesan);
+        console.log('Connected to WhatsApp.');
     } catch (error) {
         console.error('Error connecting to WhatsApp:', error);
     }
