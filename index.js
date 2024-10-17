@@ -25,8 +25,11 @@ app.get('/qrcode', (req, res) => {
     }
     const pepesan = Pepesan.init(router, config)
 
-    // Event saat menerima pembaruan koneksi
-    pepesan.on('connection.update', (update) => {
+    // Pastikan pepesan.connect dipanggil setelah inisialisasi
+    await pepesan.connect();
+
+    // Jika Pepesan menyediakan cara lain untuk mendengarkan event, gunakan itu.
+    pepesan.ev.on('connection.update', (update) => { // Coba menggunakan pepesan.ev jika ada
         const { connection, qr } = update;
 
         if (qr) {
@@ -39,8 +42,6 @@ app.get('/qrcode', (req, res) => {
             pepesan.connect();
         }
     });
-
-    await pepesan.connect();
 
     // Menjalankan server pada port yang ditentukan
     const PORT = process.env.PORT || 3000;
