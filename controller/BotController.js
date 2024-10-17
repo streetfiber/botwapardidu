@@ -90,11 +90,4 @@ module.exports = class BotController extends Controller {
         );
     }
 
-    async paymentFinish(request) {
-        const { name, whatsapp, jumlah_orang, tanggal_foto, jam_foto, harga_total, order_id, transaction_status } = request.body;
-
-        // Proses data pembayaran dan balas ke pengguna
-        await this.reply(`Pembayaran untuk Order ID: ${order_id} berhasil. Detail pembayaran:\nNama: ${name}\nJumlah Orang: ${jumlah_orang}\nTanggal Foto: ${tanggal_foto}\nJam Foto: ${jam_foto}\nTotal: Rp${harga_total}\nStatus: ${transaction_status}`);
-        return this.sendBasicMenu();
-    }
 };
