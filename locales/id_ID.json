@@ -1,0 +1,17 @@
+{
+    "intro": "*Selamat datang di chatbot Pardidu Studio*\n\nSilahkan pilih menu dibawah ini",
+    "template.menu": "Ketik angka *{{number}}* : untuk *{{menu}}*",
+
+    "menu.booking": "📷 Booking",
+    "menubookingtemplate": "Silakan klik link berikut untuk mengisi form booking",
+    "menubookingtemplate2": "https://bookingfotostudio.netlify.app/",
+
+    "menu.rincian": "📄 Riwayat Booking",
+    "headercekriwayat": "Berikut adalah riwayat booking Anda:",
+
+    "menu.livechat": "🧰 Live Chat",
+    "menu.feedback": "Feedback",
+    "menu.back": "Kembali Ke Menu Utama",
+
+    "footer": "🧰 *Selamat malam*"
+}
