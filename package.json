@@ -18,6 +18,7 @@
     "express": "^4.21.1",
     "googleapis": "^144.0.0",
     "midtrans-client": "^1.3.1",
+    "node-input-validator": "^4.5.1",
     "nodemon": "^3.0.1",
     "pepesan": "github:mqad21/pepesan",
     "string-template": "^1.0.0"

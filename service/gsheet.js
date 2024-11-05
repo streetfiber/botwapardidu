@@ -1,9 +1,19 @@
 const axios = require('axios');
 
-const baseUrl = "https://script.google.com/macros/s/AKfycbzRBxkZxSbD8iNZk3yw79MFS4kVeqdUFbDE2iJ7WUDH14U2aZJPEuf4IgTuE2dyb9WCWA/exec"; // Ganti dengan URL skrip Apps Script Anda
+// Endpoint untuk mengambil data riwayat booking
+const bookingBaseUrl = "https://script.google.com/macros/s/AKfycbzRBxkZxSbD8iNZk3yw79MFS4kVeqdUFbDE2iJ7WUDH14U2aZJPEuf4IgTuE2dyb9WCWA/exec"; // Ganti dengan URL skrip Apps Script untuk riwayat booking
+// Endpoint untuk mengirim feedback
+const feedbackBaseUrl = "https://script.google.com/macros/s/AKfycbxtzw1MyU8frN_nWpPfJhUK6ueEJsg9bSKm_dLq9QXVKodLGUte5aMem4euQOKhIDOr/exec"; // Ganti dengan URL skrip Apps Script untuk feedback
 
-const axiosInstance = axios.create({
-    baseURL: baseUrl,
+const axiosBookingInstance = axios.create({
+    baseURL: bookingBaseUrl,
+    headers: {
+        "Content-Type": "application/json"
+    }
+});
+
+const axiosFeedbackInstance = axios.create({
+    baseURL: feedbackBaseUrl,
     headers: {
         "Content-Type": "application/json"
     }
@@ -25,7 +35,7 @@ exports.getData = async (whatsapp) => {
     let responseStr = ""; // Inisialisasi variabel di sini
 
     try {
-        const response = await axiosInstance.get();
+        const response = await axiosBookingInstance.get();
         console.log("Response dari API:", response.data.data); // Log respons API
         
         if (response.data && Array.isArray(response.data.data)) {
@@ -58,3 +68,21 @@ exports.getData = async (whatsapp) => {
 
     return responseStr; // Mengembalikan responseStr
 };
+
+exports.sendFeedback = async (whatsapp, detail) => {
+    const feedbackData = {
+        feedback_id: Date.now(),
+        nama :nama,
+        whatsapp: whatsapp,
+        penilaian:penilaian,
+        detail: detail
+        
+    };
+    try {
+        const response = await axiosFeedbackInstance.post('', feedbackData);
+        console.log("Feedback berhasil dikirim:", response.data);
+    } catch (error) {
+        console.error("Error saat mengirim feedback:", error);
+    }
+};
+

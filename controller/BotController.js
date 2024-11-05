@@ -1,6 +1,7 @@
 const { Controller, Response } = require("pepesan");
 const f = require("../utils/Formatter");
 const gsheet = require("../service/gsheet");
+const { Validator } = require("node-input-validator");
 
 module.exports = class BotController extends Controller {
     async introduction(request) {
@@ -8,8 +9,9 @@ module.exports = class BotController extends Controller {
             [
                 f("menu.booking"),
                 f("menu.rincian"),
-                f("menu.livechat"),
-                f("menu.feedback")
+                f("menu.chatadmin"),
+                f("menu.feedback"),
+                f("menu.helper"),
             ],
             f("intro", [request.name]),
             f("template.menu")
@@ -25,31 +27,6 @@ module.exports = class BotController extends Controller {
         // Kirimkan link Google Form
         await this.reply(f("menubookingtemplate"));
         await this.reply(f("menubookingtemplate2"));
-        
-        // Setelah mengirim template booking, cek status pembayaran dengan GET request
-        try {
-            
-            const response = await axios.get("https://my-nodejs-project-production.up.railway.app/midtrans-finish", {
-                params: {
-                    order_id: request.body.order_id, // Sesuaikan dengan order_id dari form, jika ada
-                    whatsapp : request.body.whatsapp,
-                    jumlah_orang : request.body.jumlah_orang,
-                    tanggal_foto : request.body.tanggal_foto,
-                    jam_foto : request.body.jam_foto,
-                    harga_total : request.body.harga_total,
-                    status_message : 'berhasil',
-                },
-            });
-
-            const paymentData = response.data;
-
-            // Kirimkan detail pembayaran ke client via WhatsApp
-            await this.reply(`Pembayaran untuk Order ID: ${paymentData.order_id} berhasil. Detail pembayaran:\nNama: ${paymentData.name}\nJumlah Orang: ${paymentData.jumlah_orang}\nTanggal Foto: ${paymentData.tanggal_foto}\nJam Foto: ${paymentData.jam_foto}\nTotal: Rp${paymentData.harga_total}\nStatus: ${paymentData.transaction_status}`);
-        } catch (error) {
-            console.error("Error mengambil data dari /midtrans-finish:", error);
-            await this.reply("Terimakasih Telah menggunakan bot kami, see you soon!");
-        }
-
         // Tampilkan menu dasar setelahnya
         return this.sendBasicMenu();
     }
@@ -68,14 +45,37 @@ module.exports = class BotController extends Controller {
     }
     
     
-    async livechat(request) {
+    async chatadmin(request) {
         return this.reply("Klik tombol ini untuk memulai live chat.");
+        await this.reply(f("nomoradmin"))
     }
 
     async feedback(request) {
-        return this.reply("Terimakasih telah menggunakan bot pelayanan kami, mohon untuk mengisi survei penilaian.");
+        return this.reply(f("feedback.question"))
+        return this.reply(f("feedback.link"))
     }
-
+    
+    async helper(request){
+        return this.reply(`📋 Panduan Fitur-Fitur Chatbot Rincian Booking\n\n 1. Rincian Booking
+            \n a. Deskripsi: Fitur ini digunakan untuk melihat riwayat transaksi atau booking yang pernah Anda lakukan.
+            \n b. Cara Penggunaan: Pilih menu Rincian Booking.
+            \n  1) Jika Anda sudah pernah melakukan booking dan menyelesaikan pembayaran, chatbot akan menampilkan detail transaksi Anda.
+            \n  2) Jika belum ada transaksi, pesan "Maaf, belum ada transaksi booking" akan ditampilkan.\n\n 2. Booking 
+            \n a. Deskripsi: Fitur ini memandu Anda untuk melakukan pemesanan (booking) studio foto.
+            \n b. Cara Penggunaan: Pilih menu Booking dan Anda akan menerima tautan untuk mengakses website pemesanan.
+            \n Di website, Anda akan menemukan dua opsi:
+            \n 1) Cek Booking: Untuk mengecek ketersediaan jadwal studio.
+            \n 2) Booking: Untuk melakukan pemesanan dengan mengisi formulir berisi nama, nomor WhatsApp, jumlah orang, tanggal foto, dan jam foto.
+            \n Setelah formulir diisi, lanjutkan ke proses pembayaran. Jika pembayaran berhasil, notifikasi konfirmasi akan muncul di website.\n\n 3. Chat Admin
+            \n a. Deskripsi: Fitur ini menghubungkan Anda langsung dengan admin Pardidu Photoworks untuk bantuan lebih lanjut.
+            \n b. Cara Penggunaan: Pilih menu Chat Admin, dan Anda akan diarahkan untuk mengirim pesan langsung ke admin. Pastikan untuk menghubungi admin selama jam kerja untuk respons cepat.\n\n 4. Feedback
+            \n a. Deskripsi: Fitur ini berfungsi untuk memberikan penilaian terhadap layanan chatbot dan pengalaman Anda.
+            \n b. Cara Penggunaan: Pilih menu Feedback, lalu berikan penilaian dalam bentuk rating (1-5) dan komentar singkat. Feedback Anda sangat berharga untuk perbaikan layanan.\n\n 5. Helper
+            \n a. Deskripsi: Menu Helper adalah panduan lengkap penggunaan chatbot. Jika Anda mengalami kendala, pilih menu Helper ini kapan saja untuk mendapatkan informasi panduan seperti saat ini.\n\n
+            `);
+            
+    }
+    
     async sendBasicMenu(request) {
         return Response.menu.fromArrayOfObject(
             [
@@ -88,13 +88,5 @@ module.exports = class BotController extends Controller {
             "",
             f("template.menu")
         );
-    }
-
-    async paymentFinish(request) {
-        const { name, whatsapp, jumlah_orang, tanggal_foto, jam_foto, harga_total, order_id, transaction_status } = request.body;
-
-        // Proses data pembayaran dan balas ke pengguna
-        await this.reply(`Pembayaran untuk Order ID: ${order_id} berhasil. Detail pembayaran:\nNama: ${name}\nJumlah Orang: ${jumlah_orang}\nTanggal Foto: ${tanggal_foto}\nJam Foto: ${jam_foto}\nTotal: Rp${harga_total}\nStatus: ${transaction_status}`);
-        return this.sendBasicMenu();
     }
 };

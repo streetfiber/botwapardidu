@@ -10,5 +10,4 @@ const { ALLOWED_NUMBERS } = process.env;
     }
     const pepesan = Pepesan.init(router, config)
     await pepesan.connect()
-    console.log('QR Code data generated:', );
 })()
