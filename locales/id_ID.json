@@ -12,8 +12,8 @@
     "menu.chatadmin": "🧰 Chat Admin",
     "nomoradmin"    : "082290292069",
 
-    "feedback.question": "Silahkan klik link berikut untuk mengisi form feedback",
-    "feedback.link" : "https://docs.google.com/forms/d/e/1FAIpQLSdGjhvHn8mQmPdCTEr6TXEPR-ErEzUY5HqZIT74IJXTUSiAuw/viewform",
+    "feedbackquestion": "Silahkan klik link berikut untuk mengisi form feedback",
+    "feedbacklink" : "https://docs.google.com/forms/d/e/1FAIpQLSdGjhvHn8mQmPdCTEr6TXEPR-ErEzUY5HqZIT74IJXTUSiAuw/viewform",
     "menu.feedback": "Feedback",
 
     "menu.helper":"Helper",

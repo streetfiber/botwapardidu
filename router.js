@@ -9,6 +9,6 @@ router.menu(f("menu.rincian"), [BotController, "rincian"]);
 router.menu(f("menu.chatadmin"), [BotController, "chatadmin"]);
 router.menu(f("menu.feedback"), [BotController, "feedback"]);
 router.menu(f("menu.helper"), [BotController, "helper"]);
-router.keyword("/start", [BotController, "introduction"]);
+router.keyword("*", [BotController, "introduction"]);
 
 module.exports = router;
